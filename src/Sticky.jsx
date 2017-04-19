@@ -198,7 +198,6 @@ class Sticky extends Component {
      */
     update () {
         var disabled = !this.props.enabled ||
-            this.state.bottomBoundary - this.state.topBoundary <= this.state.height ||
             (this.state.width === 0 && this.state.height === 0);
 
         if (disabled) {
@@ -220,9 +219,7 @@ class Sticky extends Component {
         if (top <= this.state.topBoundary) { // #1
             this.reset();
         } else if (bottom >= this.state.bottomBoundary) { // #2
-            this.stickyBottom = this.state.bottomBoundary;
-            this.stickyTop = this.stickyBottom - this.state.height;
-            this.release(this.stickyTop);
+            this.release(this.state.y);
         } else {
             if (this.state.height > winHeight - this.state.top) {
                 // In this case, Sticky is higher then viewport minus top offset
@@ -238,15 +235,10 @@ class Sticky extends Component {
                         // If "top" and "bottom" are inbetween stickyTop and stickyBottom, then Sticky is in
                         // RELEASE status. Otherwise, it changes to FIXED status, and its bottom sticks to
                         // viewport bottom when scrolling down, or its top sticks to viewport top when scrolling up.
-                        this.stickyBottom = this.stickyTop + this.state.height;
-                        if (delta > 0 && bottom > this.stickyBottom) {
-                            this.fix(this.state.bottom - this.state.height);
-                        } else if (delta < 0 && top < this.stickyTop) {
-                            this.fix(this.state.top);
-                        }
+                        this.fix(this.state.top);
                         break;
                     case STATUS_FIXED:
-                        var toRelease = true;
+                        var toRelease = false;
                         var pos = this.state.pos;
                         var height = this.state.height;
                         // In regular cases, when Sticky is in FIXED status,
@@ -266,8 +258,7 @@ class Sticky extends Component {
                             var deltaHeight = (pos + height - this.state.bottom);
                             this.stickyBottom = bottom - delta + deltaHeight;
                             this.stickyTop = this.stickyBottom - height;
-                        } else {
-                            toRelease = false;
+                            toRelease = true
                         }
 
                         if (toRelease) {
